@@ -1,0 +1,137 @@
+#include <iostream>
+using namespace std;
+
+const int MAXN = 105;
+
+// 迷宫
+int g[MAXN][MAXN];
+
+// 访问标记
+bool visited[MAXN][MAXN];
+
+// 手写队列
+int q[MAXN * MAXN][2];
+
+// 记录路径来源
+int pre[MAXN][MAXN][2];
+
+int m, n;
+int startx, starty;
+int endx, endy;
+
+// 上下左右
+int move_dir[5] = { -1, 0, 1, 0, -1 };
+
+// BFS求最短路径
+bool bfs()
+{
+    int l = 0, r = 0;
+
+    // 起点入队
+    q[r][0] = startx;
+    q[r][1] = starty;
+    r++;
+
+    visited[startx][starty] = true;
+
+    while (l < r)
+    {
+        int x = q[l][0];
+        int y = q[l][1];
+        l++; // 出队
+
+        // 到达终点
+        if (x == endx && y == endy)
+            return true;
+
+        for (int i = 0; i < 4; i++)
+        {
+            int nx = x + move_dir[i];
+            int ny = y + move_dir[i + 1];
+
+            // 判断是否合法
+            if (nx >= 0 && nx < m && ny >= 0 && ny < n)
+            {
+                if (g[nx][ny] == 1 && !visited[nx][ny])
+                {
+                    visited[nx][ny] = true;
+
+                    // ⭐记录路径
+                    pre[nx][ny][0] = x;
+                    pre[nx][ny][1] = y;
+
+                    // 入队
+                    q[r][0] = nx;
+                    q[r][1] = ny;
+                    r++;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+// 输出路径
+void print_path()
+{
+    int x = endx, y = endy;
+
+    int path[MAXN * MAXN][2];
+    int cnt = 0;
+
+    // 从终点回溯
+    while (!(x == startx && y == starty))
+    {
+        path[cnt][0] = x;
+        path[cnt][1] = y;
+        cnt++;
+
+        int px = pre[x][y][0];
+        int py = pre[x][y][1];
+
+        x = px;
+        y = py;
+    }
+
+    // 加入起点
+    path[cnt][0] = startx;
+    path[cnt][1] = starty;
+    cnt++;
+
+    // 反向输出（起点 -> 终点）
+    for (int i = cnt - 1; i >= 0; i--)
+    {
+        cout << "(" << path[i][0] << "," << path[i][1] << ") ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    cin >> m >> n;
+
+    // 输入迷宫
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> g[i][j];
+        }
+    }
+
+    cin >> startx >> starty;
+    cin >> endx >> endy;
+
+    if (bfs())
+    {
+        cout << "Shortest path:" << endl;
+        print_path();
+    }
+    else
+    {
+        cout << "No path." << endl;
+    }
+
+    return 0;
+}
